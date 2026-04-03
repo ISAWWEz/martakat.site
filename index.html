@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MARTAKAT • Sunucu Paneli</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #578 url('./arka.webp') center/cover no-repeat fixed;
+      height: 100vh; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+    body::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 1; }
+
+    #top-nav {
+      position: fixed; top: 0; left: 0; width: 100%;
+      background: rgba(0, 0, 0, 0.9); padding: 10px 25px; 
+      display: none; justify-content: space-between; align-items: center;
+      z-index: 100; border-bottom: 2px solid #10b981;
+    }
+    
+    .nav-left { display: flex; align-items: center; gap: 20px; }
+    .settings-trigger { color: white; cursor: pointer; font-size: 18px; opacity: 0.7; transition: 0.3s; }
+    .settings-trigger:hover { opacity: 1; color: #10b981; }
+    .nav-links { display: flex; gap: 25px; }
+    .nav-links a { color: white; text-decoration: none; font-weight: 700; font-size: 14px; text-transform: uppercase; cursor: pointer; }
+
+    .user-area { text-align: right; }
+    #user-display { color: #10b981; font-weight: 800; font-size: 16px; display: block; }
+    .logout-btn { color: #ff4d4d; font-size: 11px; font-weight: 600; cursor: pointer; text-transform: uppercase; margin-top: 2px; display: inline-block; }
+
+    #auth-nav { position: fixed; top: 30px; right: 30px; z-index: 10; }
+    .btn-oturum { background: #10b981; color: white; padding: 15px 30px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; }
+
+    .hero { position: relative; z-index: 2; text-align: center; color: white; }
+    .main-logo { width: 220px; height: auto; margin-bottom: 20px; }
+    h1 { font-size: 32px; text-transform: uppercase; }
+
+    #copy-ip-btn {
+      position: fixed; bottom: 25px; left: 25px;
+      background: #f3a61f; color: black;
+      padding: 15px 25px; border-radius: 10px;
+      font-weight: 800; border: none; cursor: pointer;
+      display: none; z-index: 300;
+    }
+
+    .panel-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.98); overflow-y: auto; z-index: 150; padding: 80px 20px; color: white;
+    }
+    .panel-content { width: 100%; max-width: 600px; margin: 0 auto; position: relative; }
+    .close-btn { position: absolute; top: -50px; right: 0; color: white; font-size: 40px; cursor: pointer; z-index: 160; }
+    
+    .rules-box { background: #000; border-radius: 15px; padding: 30px; border-left: 5px solid #10b981; margin-top: 20px; }
+    .submit-btn { width: 100%; padding: 16px; background: #10b981; border: none; border-radius: 10px; color: white; font-weight: 700; cursor: pointer; margin-top: 20px; }
+
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(18, 18, 18, 0.95); display: none; align-items: center; justify-content: center; z-index: 200; }
+    .container { width: 90%; max-width: 400px; background: #1a1a1e; border-radius: 20px; padding: 35px; border: 1px solid #333; text-align: center; }
+    .container img { width: 120px; margin-bottom: 20px; }
+    .auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid #333; }
+    .auth-tab { flex: 1; padding: 10px; text-align: center; color: #888; cursor: pointer; font-weight: 700; }
+    .auth-tab.active { color: #10b981; border-bottom: 2px solid #10b981; }
+    input { width: 100%; padding: 15px; margin: 8px 0; background: #111; border: 1px solid #333; border-radius: 10px; color: white; outline: none; }
+    .rules-hint { color: #ff4d4d; font-size: 13px; margin: 4px 0; display: block; text-align: left; transition: 0.3s; }
+
+    #admin-trigger { position: fixed; bottom: 0; right: 0; width: 40px; height: 40px; cursor: default; z-index: 500; opacity: 0.01; }
+    
+    /* TICKET ISKELET DÜZENLEMESI */
+    .admin-ticket { 
+      background: #111; 
+      border: 1px solid #333; 
+      padding: 15px; 
+      border-radius: 10px; 
+      margin-bottom: 10px;
+      word-wrap: break-word; 
+      overflow-wrap: break-word; 
+      width: 100%; 
+    }
+    
+    .admin-ticket-header { color: #ccc; font-size: 14px; line-height: 1.6; }
+    .admin-ticket b { color: #10b981; }
+    
+    .reply-area { margin-top: 10px; display: flex; gap: 5px; flex-wrap: wrap; }
+    .reply-input { flex: 1; padding: 8px; font-size: 12px; min-width: 150px; }
+    
+    /* DÜZELTME: Yanıt alanı taşmayı engeller, gerekirse kaydırılır */
+    .admin-reply-text {
+      margin-top: 10px; 
+      color: #10b981; 
+      font-size: 13px;
+      word-wrap: break-word; 
+      overflow-wrap: break-word;
+      max-height: 150px; /* Çok uzunsa kutuyu büyütmez */
+      overflow-y: auto;  /* Kaydırma çubuğu ekler */
+      padding-right: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="top-nav">
+    <div class="nav-left">
+      <span class="settings-trigger" onclick="openSettings()" title="Ayarlar">⚙</span>
+      <div class="nav-links">
+        <a onclick="showHome()">ANA SAYFA</a>
+        <a onclick="showSupport()">DESTEK</a>
+      </div>
+    </div>
+    <div class="user-area">
+      <span id="user-display"></span>
+      <span class="logout-btn" onclick="logout()">OTURUMU KAPAT</span>
+    </div>
+  </div>
+
+  <nav id="auth-nav">
+    <button class="btn-oturum" onclick="openAuth()">OTURUM AÇ</button>
+  </nav>
+
+  <div class="hero">
+    <img src="./logo.webp" alt="Logo" class="main-logo">
+    <h1 id="welcome-msg">SUNUCUYA HOŞ GELDİN</h1>
+  </div>
+
+  <button id="copy-ip-btn" onclick="copyIP()">IP KOPYALA</button>
+
+  <div id="settings-panel" class="panel-overlay">
+    <div class="panel-content">
+      <span class="close-btn" onclick="showHome()">&times;</span>
+      <h2>HESAP AYARLARI</h2>
+      <div class="rules-box" style="border-left-color: #ff4d4d;">
+        <p>Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.</p>
+        <button class="submit-btn" style="background: #ff4d4d;" onclick="deleteAccount()">HESABI SİL</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="support-panel" class="panel-overlay">
+    <div class="panel-content">
+      <span class="close-btn" onclick="showHome()">&times;</span>
+      <h2 style="margin:0">DESTEK SİSTEMİ</h2>
+      <button onclick="toggleTicketInput(true)" style="background:#03a9f4; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; margin-top:10px;">YENİ TALEP</button>
+      <div id="ticket-input-area" style="display:none; margin-top:20px;">
+        <input type="text" id="ticket-text" placeholder="Sorununuz nedir?">
+        <button class="submit-btn" onclick="addTicket()">GÖNDER</button>
+      </div>
+      <div id="ticket-list" style="margin-top:20px;"></div>
+    </div>
+  </div>
+
+  <div id="admin-panel" class="panel-overlay">
+    <div class="panel-content">
+      <span class="close-btn" onclick="showHome()">&times;</span>
+      <h2 style="color: #f3a61f;">ADMİN YÖNETİM PANELİ</h2>
+      <div id="admin-ticket-list"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="authModal">
+    <div class="container">
+      <img src="./logo.webp" alt="Logo">
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="tab-reg" onclick="switchTab('reg')">KAYDOL</div>
+        <div class="auth-tab" id="tab-log" onclick="switchTab('log')">GİRİŞ YAP</div>
+      </div>
+      <div id="reg-form">
+        <input type="text" id="reg-user" placeholder="Yeni Nickin">
+        <input type="password" id="reg-pass" placeholder="Yeni Şifren">
+        <span class="rules-hint" id="hint-len">• En az 12 karakter</span>
+        <span class="rules-hint" id="hint-spec">• Rakam ve özel (@#₺_%)</span>
+        <button class="submit-btn" onclick="handleAuth('reg')">KAYIT OL</button>
+      </div>
+      <div id="log-form" style="display:none;">
+        <input type="text" id="log-user" placeholder="Nickin">
+        <input type="password" id="log-pass" placeholder="Şifren">
+        <button class="submit-btn" onclick="handleAuth('log')">GİRİŞ YAP</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="admin-trigger" onclick="checkAdmin()"></div>
+
+  <script>
+    let tickets = JSON.parse(localStorage.getItem('allTickets')) || [];
+    let currentUser = localStorage.getItem('martakat_user') || null;
+
+    document.getElementById('reg-pass').addEventListener('input', function(e) {
+      const v = e.target.value;
+      const lenOk = v.length >= 12;
+      const specOk = (/[@#₺_%]/.test(v) && /\d/.test(v));
+      document.getElementById('hint-len').style.color = lenOk ? '#10b981' : '#ff4d4d';
+      document.getElementById('hint-spec').style.color = specOk ? '#10b981' : '#ff4d4d';
+    });
+
+    function openAuth() { document.getElementById('authModal').style.display = 'flex'; }
+    function closeAuth() { document.getElementById('authModal').style.display = 'none'; }
+    
+    function handleAuth(mode) {
+      const u = (mode === 'reg' ? document.getElementById('reg-user') : document.getElementById('log-user')).value;
+      const p = (mode === 'reg' ? document.getElementById('reg-pass') : document.getElementById('log-pass')).value;
+      if(mode === 'reg' && (p.length < 12 || !/[@#₺_%]/.test(p) || !/\d/.test(p))) return;
+      if(!u) return;
+      currentUser = u;
+      localStorage.setItem('martakat_user', u);
+      loginSuccess(u);
+    }
+
+    function loginSuccess(n) {
+      closeAuth();
+      document.getElementById('auth-nav').style.display = 'none';
+      document.getElementById('top-nav').style.display = 'flex';
+      document.getElementById('copy-ip-btn').style.display = 'block';
+      document.getElementById('user-display').innerText = n.toUpperCase();
+      document.getElementById('welcome-msg').innerText = "TEKRAR HOŞ GELDİN, " + n.toUpperCase();
+    }
+
+    function logout() { localStorage.removeItem('martakat_user'); location.reload(); }
+    function deleteAccount() { if(confirm("Hesabını silmek istediğine emin misiniz?")) { localStorage.removeItem('martakat_user'); location.reload(); } }
+    function openSettings() { showHome(); document.getElementById('settings-panel').style.display = 'block'; }
+    function showHome() { document.querySelectorAll('.panel-overlay').forEach(p => p.style.display = 'none'); }
+    function showSupport() { showHome(); document.getElementById('support-panel').style.display = 'block'; renderTickets(); }
+    function toggleTicketInput(s) { document.getElementById('ticket-input-area').style.display = s ? 'block' : 'none'; }
+
+    function addTicket() {
+      const t = document.getElementById('ticket-text').value;
+      if(!t) return;
+      tickets.push({ id: Date.now(), user: currentUser, msg: t, reply: null });
+      saveTickets();
+      document.getElementById('ticket-text').value = '';
+      toggleTicketInput(false);
+      renderTickets();
+    }
+
+    function renderTickets() {
+      const list = document.getElementById('ticket-list');
+      list.innerHTML = tickets.filter(t => t.user === currentUser).map(t => `
+        <div class="admin-ticket">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+            <span style="flex:1;">${t.msg}</span>
+            <button onclick="deleteTicket(${t.id})" style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-size:10px; flex-shrink:0;">SİL</button>
+          </div>
+          ${t.reply ? `<div class="admin-reply-text"><b>CEVAP:</b> ${t.reply}</div>` : `<div style="font-size:11px; color:#666; margin-top:5px;">Yanıt bekleniyor...</div>`}
+        </div>`).join('');
+    }
+
+    function checkAdmin() {
+      const code = prompt("GİZLİ KODU YAZIN:");
+      if(code === "DOSENT") { showHome(); document.getElementById('admin-panel').style.display = 'block'; renderAdminTickets(); }
+    }
+
+    function renderAdminTickets() {
+      const list = document.getElementById('admin-ticket-list');
+      list.innerHTML = tickets.map(t => `
+        <div class="admin-ticket">
+          <div class="admin-ticket-header"><b>Gönderen:</b> ${t.user}<br><b>Mesaj:</b> ${t.msg}</div>
+          <div class="reply-area">
+            <input type="text" id="rep-${t.id}" class="reply-input" placeholder="Cevap yaz...">
+            <button onclick="adminReply(${t.id})" style="background:#10b981; border:none; color:white; padding:5px 10px; border-radius:5px; cursor:pointer;">GÖNDER</button>
+            <button onclick="deleteTicket(${t.id}, true)" style="background:#ff4d4d; border:none; color:white; padding:5px 10px; border-radius:5px; cursor:pointer;">SİL</button>
+          </div>
+          ${t.reply ? `<div class="admin-reply-text">Mevcut Cevap: ${t.reply}</div>` : ''}
+        </div>`).join('');
+    }
+
+    function adminReply(id) {
+      const replyText = document.getElementById(`rep-${id}`).value;
+      if(!replyText) return;
+      const index = tickets.findIndex(t => t.id === id);
+      if(index !== -1) { tickets[index].reply = replyText; saveTickets(); renderAdminTickets(); }
+    }
+
+    function deleteTicket(id, isAdmin = false) {
+      if(isAdmin || confirm("Talebi silmek istediğinize emin misiniz?")) {
+        tickets = tickets.filter(t => t.id !== id);
+        saveTickets();
+        isAdmin ? renderAdminTickets() : renderTickets();
+      }
+    }
+
+    function saveTickets() { localStorage.setItem('allTickets', JSON.stringify(tickets)); }
+    function switchTab(t) {
+      document.getElementById('reg-form').style.display = t === 'reg' ? 'block' : 'none';
+      document.getElementById('log-form').style.display = t === 'log' ? 'block' : 'none';
+      document.getElementById('tab-reg').classList.toggle('active', t === 'reg');
+      document.getElementById('tab-log').classList.toggle('active', t === 'log');
+    }
+    function copyIP() {
+      const ip = "MARTAKATDJ.aternos.me";
+      const el = document.createElement('textarea');
+      el.value = ip; document.body.appendChild(el);
+      el.select(); document.execCommand('copy');
+      document.body.removeChild(el); alert("IP Kopyalandı!");
+    }
+
+    window.onload = () => { if(currentUser) loginSuccess(currentUser); };
+  </script>
+</body>
+  </html>
+    
