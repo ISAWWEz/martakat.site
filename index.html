@@ -8,10 +8,17 @@
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
     * { box-sizing: border-box; }
+    
+    /* Arka Plan İskelet Ayarı */
     body {
       margin: 0; padding: 0;
       font-family: 'Poppins', sans-serif;
-      background: url('bg.webp') center/cover no-repeat fixed;
+      background-color: #579; /* Resim gelmezse siyah kalsın */
+      background-image: url('./arka.webp'); /* Başına ./ ekleyerek aynı klasörde olduğunu netleştirdik */
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
       height: 100vh; overflow: hidden;
       display: flex; align-items: center; justify-content: center;
       position: relative;
@@ -35,7 +42,17 @@
     .btn-oturum { background: #10b981; color: white; padding: 15px 30px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; }
 
     .hero { position: relative; z-index: 2; text-align: center; color: white; }
-    .main-logo { width: 220px; margin-bottom: 20px; }
+    
+    /* Logo İskelet Ayarı */
+    .main-logo { 
+      width: 220px; 
+      height: auto; 
+      margin-bottom: 20px; 
+      display: block; 
+      margin-left: auto; 
+      margin-right: auto;
+    }
+    
     h1 { font-size: 32px; text-transform: uppercase; }
 
     #copy-ip-btn {
@@ -59,10 +76,9 @@
 
     .submit-btn { width: 100%; padding: 16px; background: #10b981; border: none; border-radius: 10px; color: white; font-weight: 700; cursor: pointer; margin-top: 20px; }
 
-    /* AUTH MODAL DÜZELTME */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(18, 18, 18, 0.95); display: none; align-items: center; justify-content: center; z-index: 200; }
     .container { width: 90%; max-width: 400px; background: #1a1a1e; border-radius: 20px; padding: 35px; border: 1px solid #333; text-align: center; }
-    .container img { width: 120px; margin-bottom: 20px; }
+    .container img { width: 120px; height: auto; margin-bottom: 20px; }
     .auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid #333; }
     .auth-tab { flex: 1; padding: 10px; text-align: center; color: #888; cursor: pointer; font-weight: 700; }
     .auth-tab.active { color: #10b981; border-bottom: 2px solid #10b981; }
@@ -89,7 +105,7 @@
   </nav>
 
   <div class="hero">
-    <img src="logo.webp" alt="Logo" class="main-logo">
+    <img src="./logo.webp" alt="Logo" class="main-logo" onerror="console.log('Logo dosyası bulunamadı!')">
     <h1 id="welcome-msg">SUNUCUYA HOŞ GELDİN</h1>
   </div>
 
@@ -141,7 +157,7 @@
 
   <div class="modal-overlay" id="authModal">
     <div class="container">
-      <img src="logo.webp" alt="Logo">
+      <img src="./logo.webp" alt="Logo" onerror="this.style.display='none'">
       <div class="auth-tabs">
         <div class="auth-tab active" id="tab-reg" onclick="switchTab('reg')">KAYDOL</div>
         <div class="auth-tab" id="tab-log" onclick="switchTab('log')">GİRİŞ YAP</div>
@@ -163,6 +179,15 @@
 
   <script>
     let tickets = JSON.parse(localStorage.getItem('myTickets')) || [];
+
+    // İskelet Kontrolü: Resimler yüklendi mi?
+    window.addEventListener('load', function() {
+        const testImg = new Image();
+        testImg.src = "./arka.webp";
+        testImg.onerror = function() {
+            console.error("HATA: arka.webp dosyası bulunamadı. Lütfen dosya adının küçük harf olduğundan ve HTML ile aynı klasörde olduğundan emin ol.");
+        };
+    });
 
     function copyIP() {
       const ip = "MARTAKATDJ.aternos.me";
