@@ -11,7 +11,7 @@
     body {
       margin: 0; padding: 0;
       font-family: 'Poppins', sans-serif;
-      background: #578 url('./arka.webp') center/cover no-repeat fixed;
+      background: #000 url('./arka.webp') center/cover no-repeat fixed;
       height: 100vh; overflow: hidden;
       display: flex; align-items: center; justify-content: center;
       position: relative;
@@ -43,7 +43,7 @@
     h1 { font-size: 32px; text-transform: uppercase; }
 
     #copy-ip-btn {
-      position: fixed; bottom: 25px; left: 25px;
+      position: fixed; bottom: 45px; left: 25px;
       background: #f3a61f; color: black;
       padding: 15px 25px; border-radius: 10px;
       font-weight: 800; border: none; cursor: pointer;
@@ -58,6 +58,7 @@
     .close-btn { position: absolute; top: -50px; right: 0; color: white; font-size: 40px; cursor: pointer; z-index: 160; }
     
     .rules-box { background: #000; border-radius: 15px; padding: 30px; border-left: 5px solid #10b981; margin-top: 20px; }
+    .rules-content { color: #ccc; line-height: 1.8; font-size: 15px; text-align: center; }
     .submit-btn { width: 100%; padding: 16px; background: #10b981; border: none; border-radius: 10px; color: white; font-weight: 700; cursor: pointer; margin-top: 20px; }
 
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(18, 18, 18, 0.95); display: none; align-items: center; justify-content: center; z-index: 200; }
@@ -69,40 +70,48 @@
     input { width: 100%; padding: 15px; margin: 8px 0; background: #111; border: 1px solid #333; border-radius: 10px; color: white; outline: none; }
     .rules-hint { color: #ff4d4d; font-size: 13px; margin: 4px 0; display: block; text-align: left; transition: 0.3s; }
 
-    #admin-trigger { position: fixed; bottom: 0; right: 0; width: 40px; height: 40px; cursor: default; z-index: 500; opacity: 0.01; }
-    
-    /* TICKET ISKELET DÜZENLEMESI */
-    .admin-ticket { 
-      background: #111; 
-      border: 1px solid #333; 
-      padding: 15px; 
-      border-radius: 10px; 
-      margin-bottom: 10px;
-      word-wrap: break-word; 
-      overflow-wrap: break-word; 
-      width: 100%; 
+    #admin-trigger { 
+      position: fixed; bottom: 35px; right: 25px; 
+      width: 40px; height: 40px; 
+      background: #000; 
+      border: 2px solid #222; border-radius: 5px;
+      cursor: pointer; z-index: 1001; 
     }
     
+    .admin-ticket { 
+      background: #111; border: 1px solid #333; padding: 15px; border-radius: 10px; margin-bottom: 10px;
+      word-wrap: break-word; overflow-wrap: break-word; width: 100%; 
+    }
     .admin-ticket-header { color: #ccc; font-size: 14px; line-height: 1.6; }
     .admin-ticket b { color: #10b981; }
-    
     .reply-area { margin-top: 10px; display: flex; gap: 5px; flex-wrap: wrap; }
     .reply-input { flex: 1; padding: 8px; font-size: 12px; min-width: 150px; }
-    
-    /* DÜZELTME: Yanıt alanı taşmayı engeller, gerekirse kaydırılır */
     .admin-reply-text {
-      margin-top: 10px; 
-      color: #10b981; 
-      font-size: 13px;
-      word-wrap: break-word; 
-      overflow-wrap: break-word;
-      max-height: 150px; /* Çok uzunsa kutuyu büyütmez */
-      overflow-y: auto;  /* Kaydırma çubuğu ekler */
-      padding-right: 5px;
+      margin-top: 10px; color: #10b981; font-size: 13px;
+      word-wrap: break-word; overflow-wrap: break-word;
+      max-height: 150px; overflow-y: auto; padding-right: 5px;
+    }
+
+    .running-text {
+      position: fixed; bottom: 0; left: 0; width: 100%;
+      background: rgba(0, 0, 0, 0.8); color: #f3a61f;
+      padding: 5px 0; font-size: 14px; font-weight: 700;
+      z-index: 1000; border-top: 1px solid #f3a61f;
+      white-space: nowrap; overflow: hidden;
+    }
+
+    .admin-search-box {
+      background: #111; border: 1px solid #333; padding: 20px; border-radius: 10px; margin-bottom: 20px;
     }
   </style>
 </head>
 <body>
+
+  <div class="running-text">
+    <marquee behavior="scroll" direction="left" scrollamount="7">
+      SUNUCU BAKIM SAATİ 19:00-20:00 — SUNUCU BAKIM SAATİ 19:00-20:00 — SUNUCU BAKIM SAATİ 19:00-20:00
+    </marquee>
+  </div>
 
   <div id="top-nav">
     <div class="nav-left">
@@ -150,6 +159,38 @@
         <button class="submit-btn" onclick="addTicket()">GÖNDER</button>
       </div>
       <div id="ticket-list" style="margin-top:20px;"></div>
+      
+      <div style="text-align:center; margin-top:30px;">
+        <a onclick="showRules()" style="color:#10b981; cursor:pointer; font-weight:700; text-decoration: none;">SUNUCU KURALLARI</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="rules-panel" class="panel-overlay">
+    <div class="panel-content">
+      <span class="close-btn" onclick="showSupport()">&times;</span>
+      <div class="rules-box">
+        <div class="rules-content">
+          Küfür/hakaret yasakdır/<br>
+          Kan vahşet içermek yasak/<br>
+          Boşuna destek açmak yasakdır/
+        </div>
+        <h2 style="color:#10b981; text-align:center; margin:20px 0;">SUNUCU</h2>
+        <div class="rules-content">
+          Hile ve exploit kalıcı ban sebebi<br>
+          Dupe 2hafta ban<br>
+          Küfür/hakaret 2hafta mute<br>
+          Ailevi küfür sonsuz mute<br>
+          Dini küfür sonsuz mute
+        </div>
+        <h2 style="color:#10b981; text-align:center; margin:20px 0;">YETKİLİ</h2>
+        <div class="rules-content">
+          Yetkililere küfür sonsuz mute<br>
+          Yetkilileri boşuna mesğul etme 1gün ban<br>
+          Uygunsuz içerikler sonsuz ban
+        </div>
+        <button class="submit-btn" onclick="showSupport()">KABUL EDİYORUM!</button>
+      </div>
     </div>
   </div>
 
@@ -157,6 +198,16 @@
     <div class="panel-content">
       <span class="close-btn" onclick="showHome()">&times;</span>
       <h2 style="color: #f3a61f;">ADMİN YÖNETİM PANELİ</h2>
+      
+      <div class="admin-search-box">
+        <h3 style="margin-top:0; font-size:16px;">Kullanıcı Profili Görüntüle</h3>
+        <div style="display:flex; gap:10px;">
+          <input type="text" id="search-username" placeholder="Oyuncu Nickini Girin...">
+          <button onclick="searchUserProfile()" style="background:#03a9f4; border:none; color:white; padding:0 20px; border-radius:10px; cursor:pointer; font-weight:bold;">ARA</button>
+        </div>
+        <div id="search-result" style="margin-top:15px; color:#ccc; font-size:14px;"></div>
+      </div>
+
       <div id="admin-ticket-list"></div>
     </div>
   </div>
@@ -183,10 +234,11 @@
     </div>
   </div>
 
-  <div id="admin-trigger" onclick="checkAdmin()"></div>
+  <div id="admin-trigger" onclick="checkAdmin()" title="Admin Paneli"></div>
 
   <script>
     let tickets = JSON.parse(localStorage.getItem('allTickets')) || [];
+    let allUsers = JSON.parse(localStorage.getItem('martakat_all_users')) || [];
     let currentUser = localStorage.getItem('martakat_user') || null;
 
     document.getElementById('reg-pass').addEventListener('input', function(e) {
@@ -201,10 +253,18 @@
     function closeAuth() { document.getElementById('authModal').style.display = 'none'; }
     
     function handleAuth(mode) {
-      const u = (mode === 'reg' ? document.getElementById('reg-user') : document.getElementById('log-user')).value;
+      const u = (mode === 'reg' ? document.getElementById('reg-user') : document.getElementById('log-user')).value.trim();
       const p = (mode === 'reg' ? document.getElementById('reg-pass') : document.getElementById('log-pass')).value;
       if(mode === 'reg' && (p.length < 12 || !/[@#₺_%]/.test(p) || !/\d/.test(p))) return;
       if(!u) return;
+      
+      // Kullanıcıyı veritabanına ekle
+      const upperUser = u.toUpperCase();
+      if(!allUsers.includes(upperUser)) {
+        allUsers.push(upperUser);
+        localStorage.setItem('martakat_all_users', JSON.stringify(allUsers));
+      }
+
       currentUser = u;
       localStorage.setItem('martakat_user', u);
       loginSuccess(u);
@@ -224,12 +284,13 @@
     function openSettings() { showHome(); document.getElementById('settings-panel').style.display = 'block'; }
     function showHome() { document.querySelectorAll('.panel-overlay').forEach(p => p.style.display = 'none'); }
     function showSupport() { showHome(); document.getElementById('support-panel').style.display = 'block'; renderTickets(); }
+    function showRules() { showHome(); document.getElementById('rules-panel').style.display = 'block'; }
     function toggleTicketInput(s) { document.getElementById('ticket-input-area').style.display = s ? 'block' : 'none'; }
 
     function addTicket() {
       const t = document.getElementById('ticket-text').value;
       if(!t) return;
-      tickets.push({ id: Date.now(), user: currentUser, msg: t, reply: null });
+      tickets.push({ id: Date.now(), user: currentUser, msg: t, reply: null, repliedBy: null });
       saveTickets();
       document.getElementById('ticket-text').value = '';
       toggleTicketInput(false);
@@ -244,26 +305,55 @@
             <span style="flex:1;">${t.msg}</span>
             <button onclick="deleteTicket(${t.id})" style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-size:10px; flex-shrink:0;">SİL</button>
           </div>
-          ${t.reply ? `<div class="admin-reply-text"><b>CEVAP:</b> ${t.reply}</div>` : `<div style="font-size:11px; color:#666; margin-top:5px;">Yanıt bekleniyor...</div>`}
+          ${t.reply ? `<div class="admin-reply-text"><b>CEVAP (${t.repliedBy}):</b> ${t.reply}</div>` : `<div style="font-size:11px; color:#666; margin-top:5px;">Yanıt bekleniyor...</div>`}
         </div>`).join('');
     }
 
     function checkAdmin() {
-      const code = prompt("GİZLİ KODU YAZIN:");
-      if(code === "DOSENT") { showHome(); document.getElementById('admin-panel').style.display = 'block'; renderAdminTickets(); }
+      const code = prompt("ADMİN ŞİFRESİ GİRİN:");
+      if(code === "☍⟁ᚦDOS✓ENT꧁") { 
+        showHome();
+        document.getElementById('admin-panel').style.display = 'block'; 
+        renderAdminTickets(); 
+      } else if (code !== null) {
+        alert("Hatalı Şifre!");
+      }
+    }
+
+    function searchUserProfile() {
+      const rawUsername = document.getElementById('search-username').value.trim();
+      if(!rawUsername) return;
+      const username = rawUsername.toUpperCase();
+      
+      const userTickets = tickets.filter(t => t.user.toUpperCase() === username);
+      const isRegistered = allUsers.includes(username);
+      const resultDiv = document.getElementById('search-result');
+
+      if(!isRegistered && userTickets.length === 0) {
+        resultDiv.innerHTML = `<div style="color:#ff4d4d; font-weight:bold;">Sistemde "${username}" adında bir kullanıcı bulunamadı!</div>`;
+        return;
+      }
+
+      resultDiv.innerHTML = `
+        <div style="background:#1a1a1e; padding:15px; border-radius:8px; border-left: 4px solid #f3a61f;">
+          <b style="color:#10b981; font-size:16px;">Kullanıcı: ${username}</b><br>
+          <span style="color:#888; font-size:12px;">Durum: Aktif (Sistemde Kayıtlı)</span><br><br>
+          <b>Toplam Açtığı Talep:</b> ${userTickets.length}
+        </div>
+      `;
     }
 
     function renderAdminTickets() {
       const list = document.getElementById('admin-ticket-list');
       list.innerHTML = tickets.map(t => `
         <div class="admin-ticket">
-          <div class="admin-ticket-header"><b>Gönderen:</b> ${t.user}<br><b>Mesaj:</b> ${t.msg}</div>
+          <div class="admin-ticket-header"><b>Gönderen:</b> <span style="color:#03a9f4;">${t.user}</span><br><b>Mesaj:</b> ${t.msg}</div>
           <div class="reply-area">
             <input type="text" id="rep-${t.id}" class="reply-input" placeholder="Cevap yaz...">
             <button onclick="adminReply(${t.id})" style="background:#10b981; border:none; color:white; padding:5px 10px; border-radius:5px; cursor:pointer;">GÖNDER</button>
             <button onclick="deleteTicket(${t.id}, true)" style="background:#ff4d4d; border:none; color:white; padding:5px 10px; border-radius:5px; cursor:pointer;">SİL</button>
           </div>
-          ${t.reply ? `<div class="admin-reply-text">Mevcut Cevap: ${t.reply}</div>` : ''}
+          ${t.reply ? `<div class="admin-reply-text">Mevcut Cevap (${t.repliedBy}): ${t.reply}</div>` : ''}
         </div>`).join('');
     }
 
@@ -271,7 +361,12 @@
       const replyText = document.getElementById(`rep-${id}`).value;
       if(!replyText) return;
       const index = tickets.findIndex(t => t.id === id);
-      if(index !== -1) { tickets[index].reply = replyText; saveTickets(); renderAdminTickets(); }
+      if(index !== -1) { 
+        tickets[index].reply = replyText; 
+        tickets[index].repliedBy = currentUser || 'Yönetici';
+        saveTickets(); 
+        renderAdminTickets(); 
+      }
     }
 
     function deleteTicket(id, isAdmin = false) {
@@ -283,12 +378,14 @@
     }
 
     function saveTickets() { localStorage.setItem('allTickets', JSON.stringify(tickets)); }
+    
     function switchTab(t) {
       document.getElementById('reg-form').style.display = t === 'reg' ? 'block' : 'none';
       document.getElementById('log-form').style.display = t === 'log' ? 'block' : 'none';
       document.getElementById('tab-reg').classList.toggle('active', t === 'reg');
       document.getElementById('tab-log').classList.toggle('active', t === 'log');
     }
+    
     function copyIP() {
       const ip = "MARTAKATDJ.aternos.me";
       const el = document.createElement('textarea');
@@ -297,8 +394,16 @@
       document.body.removeChild(el); alert("IP Kopyalandı!");
     }
 
-    window.onload = () => { if(currentUser) loginSuccess(currentUser); };
+    window.onload = () => { 
+      if(currentUser) {
+        if(!allUsers.includes(currentUser.toUpperCase())) {
+          allUsers.push(currentUser.toUpperCase());
+          localStorage.setItem('martakat_all_users', JSON.stringify(allUsers));
+        }
+        loginSuccess(currentUser); 
+      }
+    };
   </script>
 </body>
   </html>
-    
+  
